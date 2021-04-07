@@ -4,6 +4,8 @@ from sqlalchemy.orm import sessionmaker
 import os
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
 # # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@localhost:5432/centarnit_db"
+print('DATABASE_URL .get()', os.environ.get('DATABASE_URL'))
+print('DATABASE_URL []', os.environ['DATABASE_URL'])
 SQLALCHEMY_DATABASE_URL = os.environ['DATABASE_URL']
 
 # engine = create_engine(
