@@ -1,0 +1,1 @@
+web: uvicorn blog.main:app
