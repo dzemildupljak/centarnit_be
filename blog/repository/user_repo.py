@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from blog.hashing import Hash
+from blog.helpers.hashing import Hash
 from blog import models, schemas
 
 

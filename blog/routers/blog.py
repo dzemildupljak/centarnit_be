@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from blog.database import get_db
 from blog import schemas
 from blog.repository import blog_repo
-from blog.oaut2 import get_current_user
+from blog.helpers.oaut2 import get_current_user
 
 router = APIRouter(
     prefix='/blog',

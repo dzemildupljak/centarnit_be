@@ -5,6 +5,7 @@ import os
 
 SQLALCHEMY_DATABASE_URL = 'postgresql' + os.environ['DATABASE_URL'][8:]
 
+
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )

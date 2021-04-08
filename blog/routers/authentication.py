@@ -3,8 +3,8 @@ from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from blog.database import get_db
 from blog import models
-from blog.hashing import Hash
-from blog.JWToken import create_access_token
+from blog.helpers.hashing import Hash
+from blog.helpers.JWToken import create_access_token
 
 
 router = APIRouter(
