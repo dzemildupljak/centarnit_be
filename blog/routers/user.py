@@ -13,16 +13,16 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=List[schemas.ShowUser])
-def get_all_users(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+@router.get('/', response_model=List[schemas.user.ShowUser])
+def get_all_users(db: Session = Depends(get_db), current_user: schemas.user.User = Depends(get_current_user)):
     return user_repo.get_all_users(db)
 
 
-@router.get('/{id}', response_model=schemas.ShowUser)
-def get_user_by_id(id: int, db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+@router.get('/{id}', response_model=schemas.user.ShowUser)
+def get_user_by_id(id: int, db: Session = Depends(get_db), current_user: schemas.user.User = Depends(get_current_user)):
     return user_repo.get_user_by_id(id, db)
 
 
-@router.post('/', response_model=schemas.ShowUser)
-def create_user(request: schemas.User, db: Session = Depends(get_db)):
+@router.post('/', response_model=schemas.user.ShowUser)
+def create_user(request: schemas.user.User, db: Session = Depends(get_db)):
     return user_repo.create_user(request, db)

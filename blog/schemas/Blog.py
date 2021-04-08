@@ -1,6 +1,5 @@
-from typing import Optional
 from pydantic import BaseModel
-from .User import ShowUser
+from blog.schemas.user import ShowUser
 
 
 class Blog(BaseModel):

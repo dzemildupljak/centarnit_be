@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from blog.database import Base
+from blog.models.blog import Blog
 
 
 class User(Base):

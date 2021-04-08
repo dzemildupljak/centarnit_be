@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import JWSError, jwt
+from jose import jwt
 from jose.exceptions import JWTError
-from blog.schemas import TokenData
+from blog.schemas.token import TokenData
 
 
 SECRET_KEY = "29d54264f4b9340762e7d81d523e1a1931802b3bc706a65480e3817b84b0433a"
