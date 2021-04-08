@@ -19,3 +19,7 @@ class ShowBlog(Blog):
 
     class Config:
         orm_mode = True
+
+
+class BlogTest(BaseModel):
+    pass
