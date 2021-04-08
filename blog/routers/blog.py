@@ -32,6 +32,6 @@ def update_blog(id: int, request: blog.Blog, db: Session = Depends(get_db), curr
     return blog_repo.update_blog(id, request, db)
 
 
-@router.delete('/', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_blog(id: int, db: Session = Depends(get_db), current_user: user.User = Depends(get_current_user)):
     return blog_repo.delete_blog(id, db)
