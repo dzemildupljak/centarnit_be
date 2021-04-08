@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import jwt
 from jose.exceptions import JWTError
-from blog.schemas import token
+from blog.schemas.token import TokenData
 
 
 SECRET_KEY = "29d54264f4b9340762e7d81d523e1a1931802b3bc706a65480e3817b84b0433a"
@@ -27,6 +27,6 @@ def verify_token(tkn: str, credentials_exception):
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
-        token_data = token.TokenData(username=username)
+        # token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
