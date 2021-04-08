@@ -1,5 +1,5 @@
-from .User import User
-from .Blog import Blog
+from .user import User
+from .blog import Blog
 
 
 __all__ = [
