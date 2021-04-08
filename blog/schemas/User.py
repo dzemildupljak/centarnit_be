@@ -20,7 +20,3 @@ class ShowUser(BaseModel):
 class Login(BaseModel):
     username: str
     password: str
-
-
-class UserTest(BaseModel):
-    pass
