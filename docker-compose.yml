@@ -1,30 +1,19 @@
 services:
-  postgres:
-    image: postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=postgres
-  web:
-    build: .
+  server:
+    build:
+      context: .
     volumes:
-      - .:/code
+      - .:/app
+    command: uvicorn blog.main:app --reload --host 0.0.0.0 --port 8001
     ports:
-      - "80:80"
+      - 8001:8001
     depends_on:
-      - postgres
-# version: "3.8"
-# services:
-#   server:
-#     build:
-#       context: ./
-#       dockerfile: Dockerfile
-#     volumes:
-#       - ./:/app/
-#     command: uvicorn blog.main:app --host 0.0.0.0 --port 80
-#     env_file:
-#       - ./.env
-#     ports:
-#       - 80:80
+      - db
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
+volumes:
+  postgres_data:

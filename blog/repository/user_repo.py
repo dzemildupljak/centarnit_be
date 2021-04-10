@@ -10,12 +10,12 @@ def get_all_users(db: Session):
 
 
 def get_user_by_id(id: int, db: Session):
-    user = db.query(user.User).where(user.User.id == id).first()
-    if not user:
+    usr = db.query(user.User).where(user.User.id == id).first()
+    if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'user with id {id} was not found')
 
-    return user
+    return usr
 
 
 def create_user(user_req: user.User, db: Session):

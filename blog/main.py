@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from blog.database import Base, engine
-from . import models
 from blog.routers import authentication, blog, user
 
 
