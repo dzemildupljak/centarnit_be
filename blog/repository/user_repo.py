@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from blog.helpers.hashing import Hash
+from blog.helpers.hashing import bycrpt_hash
 from blog.models import user
 
 
@@ -20,7 +20,7 @@ def get_user_by_id(id: int, db: Session):
 
 def create_user(user_req: user.User, db: Session):
     new_user = user.User(name=user_req.name, email=user_req.email,
-                         username=user_req.username, password=Hash.bycrpt(user_req.password))
+                         username=user_req.username, password=bycrpt_hash(user_req.password))
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

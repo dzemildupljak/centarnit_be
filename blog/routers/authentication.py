@@ -3,7 +3,7 @@ from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from blog.database import get_db
 from blog.models.user import User
-from blog.helpers.hashing import Hash
+from blog.helpers.hashing import verify_hash
 from blog.helpers.JWToken import create_access_token
 
 
@@ -20,7 +20,7 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='Invalid credentials')
 
-    if not Hash.verify(request.password, user.password):
+    if not verify_hash(request.password, user.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='Invalid credentials1')
 
