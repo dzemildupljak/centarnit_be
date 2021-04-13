@@ -25,3 +25,13 @@ def create_user(user_req: user.User, db: Session):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+def delete_user(id: int, db: Session):
+    usr = db.query(user.User).filter(user.User.id == id)
+    if not usr.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'user with id {id} was not found')
+    usr.delete(synchronize_session=False)
+    db.commit()
+    return 'deleted'

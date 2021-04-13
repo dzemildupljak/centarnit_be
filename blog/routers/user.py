@@ -1,6 +1,8 @@
+from blog.models import user
 from fastapi import APIRouter, Depends
 from typing import List
 from sqlalchemy.orm import Session
+from starlette import status
 from blog.database import get_db
 from blog import schemas
 from blog.repository import user_repo
@@ -26,3 +28,8 @@ def get_user_by_id(id: int, db: Session = Depends(get_db), current_user: schemas
 @router.post('/', response_model=schemas.user.ShowUser)
 def create_user(request: schemas.user.User, db: Session = Depends(get_db)):
     return user_repo.create_user(request, db)
+
+
+@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(id: int, db: Session = Depends(get_db), current_user: schemas.user.User = Depends(get_current_user)):
+    return user_repo.delete_user(id, db)
