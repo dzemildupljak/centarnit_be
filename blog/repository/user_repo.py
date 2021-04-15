@@ -34,4 +34,3 @@ def delete_user(id: int, db: Session):
                             detail=f'user with id {id} was not found')
     usr.delete(synchronize_session=False)
     db.commit()
-    return 'deleted'
