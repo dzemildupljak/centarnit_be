@@ -8,7 +8,9 @@ class Blog(BaseModel):
     body: str
 
 
-class CreateBlog(Blog):
+class CreateBlog(BaseModel):
+    title: str
+    body: str
     author: int
 
     class Config:

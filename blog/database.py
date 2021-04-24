@@ -4,15 +4,15 @@ from sqlalchemy.orm import sessionmaker
 import os
 # from dotenv import dotenv_values
 
-# print(dotenv_values['POSTGRES_DB'])
+# print(dotenv_values()['SECRET_KEY'])
 # print(os.environ['POSTGRES_PASSWORD'])
 # SQLALCHEMY_DATABASE_URL = 'postgresql' + os.environ['DATABASE_URL'][8:]
 if 'DATABASE_URL' in os.environ:
     SQLALCHEMY_DATABASE_URL = 'postgresql' + os.environ['DATABASE_URL'][8:]
 else:
-    SQLALCHEMY_DATABASE_URL = "postgresql://wvayycvipuslad:589a7961d101195b9909f0194d365539fad055d1ef5de8fd6c144f5f6b52761e@ec2-54-72-155-238.eu-west-1.compute.amazonaws.com:5432/d70lha4t5efof3"
+    # SQLALCHEMY_DATABASE_URL = "postgresql://wvayycvipuslad:589a7961d101195b9909f0194d365539fad055d1ef5de8fd6c144f5f6b52761e@ec2-54-72-155-238.eu-west-1.compute.amazonaws.com:5432/d70lha4t5efof3"
     # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@db:5432/centarnit_db"
-    # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@localhost:5432/centarnit_db"
+    SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@localhost:5432/centarnit_db"
 
 
 engine = create_engine(

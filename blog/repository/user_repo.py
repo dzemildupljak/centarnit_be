@@ -21,6 +21,11 @@ def get_user_by_id(id: int, db: Session):
 def create_user(user_req: user.User, db: Session):
     new_user = user.User(name=user_req.name, email=user_req.email,
                          username=user_req.username, password=bycrpt_hash(user_req.password))
+    if user_req:
+        new_user.role = user_req.role
+    else:
+        new_user.role = 'user'
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

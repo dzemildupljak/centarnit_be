@@ -1,15 +1,10 @@
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.security.oauth2 import SecurityScopes
 from blog.helpers.JWToken import verify_token
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login", scopes='')
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    return verify_token(token, credentials_exception)
+def get_current_user(role: SecurityScopes, token: str = Depends(oauth2_scheme)):
+    return verify_token(token, role)

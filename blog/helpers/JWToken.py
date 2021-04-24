@@ -1,10 +1,14 @@
 from datetime import datetime, timedelta
 from typing import Optional
+from fastapi.exceptions import HTTPException
+from fastapi.security.oauth2 import SecurityScopes
 from jose import jwt
 from jose.exceptions import JWTError
+from starlette import status
+from dotenv.main import dotenv_values
 
 
-SECRET_KEY = "29d54264f4b9340762e7d81d523e1a1931802b3bc706a65480e3817b84b0433a"
+SECRET_KEY = dotenv_values()['SECRET_KEY']
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -20,11 +24,26 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def verify_token(tkn: str, credentials_exception):
+def verify_token(tkn: str, role: SecurityScopes):
     try:
         payload = jwt.decode(tkn, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
+        rls = payload.get("role")
         if username is None:
-            raise credentials_exception
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        if rls not in role.scopes:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to access this location",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
     except JWTError:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

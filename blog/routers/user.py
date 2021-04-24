@@ -1,3 +1,4 @@
+from fastapi.param_functions import Security
 from blog.models import user
 from fastapi import APIRouter, Depends
 from typing import List
@@ -16,12 +17,16 @@ router = APIRouter(
 
 
 @router.get('/', response_model=List[schemas.user.ShowUser])
-def get_all_users(db: Session = Depends(get_db), current_user: schemas.user.User = Depends(get_current_user)):
+def get_all_users(db: Session = Depends(get_db),
+                  current_user: schemas.user.User =
+                  Security(get_current_user, scopes=['sysadmin', 'admin'])):
     return user_repo.get_all_users(db)
 
 
 @router.get('/{id}', response_model=schemas.user.ShowUser)
-def get_user_by_id(id: int, db: Session = Depends(get_db), current_user: schemas.user.User = Depends(get_current_user)):
+def get_user_by_id(id: int, db: Session = Depends(get_db),
+                   current_user: schemas.user.User =
+                   Security(get_current_user, scopes=['sysadmin', 'admin'])):
     return user_repo.get_user_by_id(id, db)
 
 
@@ -31,5 +36,7 @@ def create_user(request: schemas.user.User, db: Session = Depends(get_db)):
 
 
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_user(id: int, db: Session = Depends(get_db), current_user: schemas.user.User = Depends(get_current_user)):
+def delete_user(id: int, db: Session = Depends(get_db),
+                current_user: schemas.user.User =
+                Security(get_current_user, scopes=['sysadmin', 'admin'])):
     return user_repo.delete_user(id, db)

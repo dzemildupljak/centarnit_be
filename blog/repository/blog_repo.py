@@ -1,11 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from blog import models, schemas
-# from blog import models, schemas
 
 
-def get_all_blogs(db: Session):
-    blogs = db.query(models.blog.Blog).all()
+def get_all_blogs(user_id: int, db: Session):
+    blogs = db.query(models.blog.Blog).filter(
+        models.blog.Blog.user_id == user_id).all()
     return blogs
 
 

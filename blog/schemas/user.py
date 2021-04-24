@@ -6,6 +6,7 @@ class User(BaseModel):
     email: str
     username: str
     password: str
+    role: str
 
 
 class ShowUser(BaseModel):
@@ -13,6 +14,7 @@ class ShowUser(BaseModel):
     name: str
     email: str
     username: str
+    role: str
 
     class Config:
         orm_mode = True
