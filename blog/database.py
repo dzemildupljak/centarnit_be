@@ -11,7 +11,11 @@ from dotenv import dotenv_values
 # SQLALCHEMY_DATABASE_URL = "postgresql://wvayycvipuslad:589a7961d101195b9909f0194d365539fad055d1ef5de8fd6c144f5f6b52761e@ec2-54-72-155-238.eu-west-1.compute.amazonaws.com:5432/d70lha4t5efof3"
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@db:5432/centarnit_db"
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@localhost:5432/centarnit_db"
-SQLALCHEMY_DATABASE_URL = dotenv_values()['SQLALCHEMY_DATABASE_URL']
+if dotenv_values()['SQLALCHEMY_DATABASE_URL']:
+    SQLALCHEMY_DATABASE_URL = dotenv_values()['SQLALCHEMY_DATABASE_URL']
+else:
+    SQLALCHEMY_DATABASE_URL = os.environ['SQLALCHEMY_DATABASE_URL']
+
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
