@@ -1,14 +1,13 @@
 from datetime import datetime, timedelta
+import os
 from typing import Optional
 from fastapi.exceptions import HTTPException
 from fastapi.security.oauth2 import SecurityScopes
 from jose import jwt
 from jose.exceptions import JWTError
 from starlette import status
-from dotenv.main import dotenv_values
 
-
-SECRET_KEY = dotenv_values()['SECRET_KEY']
+SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
