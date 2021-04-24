@@ -6,3 +6,4 @@ __pycache__
 database_test.py
 
 /data
+.env
