@@ -1,3 +1,4 @@
+import sys
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from blog.helpers.hashing import bycrpt_hash
@@ -19,6 +20,13 @@ def get_user_by_id(id: int, db: Session):
 
 
 def create_user(user_req: user.User, db: Session):
+    users = users = db.query(user.User).all()
+    if not users:
+        sys_user = user.User(name='sysadmin', email='sysadmin@mail.com',
+                             username='sysadmin', password=bycrpt_hash('sysadmin'),
+                             role='sysadmin')
+        db.add(sys_user)
+        db.commit()
     new_user = user.User(name=user_req.name, email=user_req.email,
                          username=user_req.username, password=bycrpt_hash(user_req.password))
     if user_req:
