@@ -1,5 +1,4 @@
 from fastapi.param_functions import Security
-from blog.models import user
 from fastapi import APIRouter, Depends
 from typing import List
 from sqlalchemy.orm import Session
