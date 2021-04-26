@@ -8,7 +8,6 @@ from jose.exceptions import JWTError
 from starlette import status
 
 SECRET_KEY = str(os.getenv('SECRET_KEY'))
-print(SECRET_KEY)
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
