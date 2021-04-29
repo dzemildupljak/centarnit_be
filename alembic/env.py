@@ -1,8 +1,8 @@
-from blog.database import Base
+from blog import models
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import pool, MetaData
 
 from alembic import context
 
@@ -10,16 +10,44 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 
+config.set_main_option(
+    "sqlalchemy.url", "postgresql://postgres:root@localhost:5432/centarnit_db")
+# config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+
+
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 fileConfig(config.config_file_name)
 
+# # add your model's MetaData object here
+# # for 'autogenerate' support
+# # from myapp import mymodel
+# # target_metadata = mymodel.Base.metadata
+# # target_metadata = None
+# target_metadata = Base.metadata
+
+#############################################################
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-# target_metadata = None
-target_metadata = Base.metadata
+
+
+def combine_metadata():
+    # from blog import models  # models file into which all models are imported
+    # from sqlalchemy import MetaData
+    model_classes = []
+    for model_name in models.__all__:
+        model_classes.append(getattr(models, model_name))
+    m = MetaData()
+    for model in model_classes:
+        for t in model.metadata.tables.values():
+            t.tometadata(m)
+    return m
+
+
+target_metadata = combine_metadata()
+#############################################################
 
 
 # other values from the config, defined by the needs of env.py,

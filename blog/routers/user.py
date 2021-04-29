@@ -34,6 +34,11 @@ def create_user(request: schemas.user.User, db: Session = Depends(get_db)):
     return user_repo.create_user(request, db)
 
 
+@router.put('/{id}/role/{role}')
+def update_user_role(id: int, role: str, db: Session = Depends(get_db)):
+    return user_repo.update_user_role(id, role, db)
+
+
 @router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(id: int, db: Session = Depends(get_db),
                 current_user: schemas.user.User =

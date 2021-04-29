@@ -1,4 +1,3 @@
-import sys
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from blog.helpers.hashing import bycrpt_hash
@@ -36,6 +35,18 @@ def create_user(user_req: user.User, db: Session):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+def update_user_role(id: int, rle: str, db: Session):
+    usr = db.query(user.User).filter(
+        user.User.id == id)
+    if usr.first():
+        usr.update({user.User.role: rle})
+        db.commit()
+        raise HTTPException(status_code=status.HTTP_200_OK,
+                            detail=f'user with id {id} was updated')
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f'user with id {id} was not updated')
 
 
 def delete_user(id: int, db: Session):
