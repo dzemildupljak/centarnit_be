@@ -2,9 +2,15 @@ services:
   server:
     build:
       context: .
+    environment:
+      - SQLALCHEMY_DATABASE_URL=${SQLALCHEMY_DATABASE_URL_DOCKER}
     volumes:
       - .:/app
-    command: uvicorn blog.main:app --reload --host 0.0.0.0 --port 8001
+    command: bash -c "uvicorn blog.main:app --host 0.0.0.0 --port 8001 --reload"
+    # command: bash -c "alembic upgrade head && uvicorn blog.main:app --host 0.0.0.0 --port 8001 --reload"
+    # command: uvicorn blog.main:app --reload --host 0.0.0.0 --port 8001
+    # command: alembic upgrade head
+
     ports:
       - 8001:8001
     depends_on:
