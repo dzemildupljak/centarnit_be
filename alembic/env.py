@@ -1,3 +1,4 @@
+import os
 from blog import models
 from logging.config import fileConfig
 
@@ -9,10 +10,12 @@ from alembic import context
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-
+SQLALCHEMY_DATABASE_URL = os.getenv('SQLALCHEMY_DATABASE_URL')
 config.set_main_option(
-    "sqlalchemy.url", "postgresql://postgres:root@localhost:5432/centarnit_db")
-# config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+    "sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+
+# config.set_main_option(
+#     "sqlalchemy.url", "postgresql://postgres:root@db:5432/centarnit_db")
 
 
 # Interpret the config file for Python logging.

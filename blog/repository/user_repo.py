@@ -38,9 +38,12 @@ def create_user(user_req: user.User, db: Session):
 
 
 def update_user_role(id: int, rle: str, db: Session):
+    if rle not in ['admin', 'user', 'author', 'sysadmin']:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail=f'Cannot assign this role')
     usr = db.query(user.User).filter(
         user.User.id == id)
-    if usr.first():
+    if usr.first() and usr.first().role != rle:
         usr.update({user.User.role: rle})
         db.commit()
         raise HTTPException(status_code=status.HTTP_200_OK,
