@@ -1,6 +1,6 @@
 FROM python:3.9
 
-EXPOSE 8000
+EXPOSE 8001
 
 COPY ./ /app
 

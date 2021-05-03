@@ -2,8 +2,10 @@ services:
   server:
     build:
       context: .
-    environment:
-      - SQLALCHEMY_DATABASE_URL=${SQLALCHEMY_DATABASE_URL_DOCKER}
+    env_file:
+      - .env
+    # environment:
+    #   - SQLALCHEMY_DATABASE_URL=${SQLALCHEMY_DATABASE_URL}
     volumes:
       - .:/app
     command: bash -c "uvicorn blog.main:app --host 0.0.0.0 --port 8001 --reload"
@@ -17,9 +19,21 @@ services:
       - db
   db:
     image: postgres:13-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data/
     ports:
       - 5432:5432
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=pgadmin4@pgadmin.org
+      - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+      - "5050:5050"
+    depends_on:
+      - db
 volumes:
   postgres_data:
