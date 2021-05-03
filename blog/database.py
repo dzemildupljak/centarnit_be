@@ -13,7 +13,15 @@ from dotenv import load_dotenv
 # SQLALCHEMY_DATABASE_URL = "postgresql://postgres:root@localhost:5432/centarnit_db"
 # print('dotenv_values()', dotenv_values()['SQLALCHEMY_DATABASE_URL'])
 load_dotenv()
-SQLALCHEMY_DATABASE_URL = os.getenv('SQLALCHEMY_DATABASE_URL')
+USER = os.getenv('POSTGRES_USER')
+PASSWORD = os.getenv('POSTGRES_PASSWORD')
+SERVER = os.getenv('POSTGRES_SERVER')
+PORT = os.getenv('POSTGRES_PORT')
+DB = os.getenv('POSTGRES_DB')
+print(
+    f'postgresql://${USER}:${PASSWORD}@${SERVER}:${PORT}/${DB}')
+
+SQLALCHEMY_DATABASE_URL = f'postgresql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}'
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
