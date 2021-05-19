@@ -35,7 +35,9 @@ def create_user(request: schemas.user.User, db: Session = Depends(get_db)):
 
 
 @router.put('/{id}/role/{role}')
-def update_user_role(id: int, role: str, db: Session = Depends(get_db)):
+def update_user_role(id: int, role: str, db: Session = Depends(get_db),
+                     current_user: schemas.user.User =
+                     Security(get_current_user, scopes=['sysadmin', 'admin'])):
     return user_repo.update_user_role(id, role, db)
 
 

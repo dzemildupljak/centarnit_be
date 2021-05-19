@@ -18,8 +18,6 @@ PASSWORD = os.getenv('POSTGRES_PASSWORD')
 SERVER = os.getenv('POSTGRES_SERVER')
 PORT = os.getenv('POSTGRES_PORT')
 DB = os.getenv('POSTGRES_DB')
-print(
-    f'postgresql://${USER}:${PASSWORD}@${SERVER}:${PORT}/${DB}')
 
 SQLALCHEMY_DATABASE_URL = f'postgresql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}'
 
