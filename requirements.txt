@@ -8,3 +8,4 @@ python-jose
 python-multipart
 python-dotenv
 alembic
+fastapi-mail
