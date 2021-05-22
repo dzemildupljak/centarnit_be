@@ -36,7 +36,6 @@ def get_user_by_id(id: int, db: Session = Depends(get_db),
 
 @router.post('/', response_model=schemas.user.ShowUser)
 async def create_user(request: schemas.user.CreateUser, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    print(30*'=', request)
     new_user = user_repo.create_user(request, db)
     if new_user:
         message = MessageSchema(
@@ -44,7 +43,7 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
             recipients=[new_user.email],
             body=f"""
                 <p>Thanks for using Fastapi-mail</p>
-                <p><a href="http://127.0.0.1:8000/confirm/{new_user.id}/{request.password}" target="_blank">Confirm here</a></p>
+                <p><a href="https://centarnitbe.herokuapp.com/confirm/{new_user.id}/{request.password}" target="_blank">Confirm here</a></p>
                 """,
             subtype="html"
         )

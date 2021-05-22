@@ -10,4 +10,4 @@ from base64 import b64encode
 pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
 sifra = pwd_cxt.hash('sysadmin')
-print(sifra)
+# print(sifra)

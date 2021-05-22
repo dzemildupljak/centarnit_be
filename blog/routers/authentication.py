@@ -33,7 +33,6 @@ async def simple_send(email: email.EmailSchema):
         body=html,
         subtype="html"
     )
-    print(30*'-', conf)
 
     fm = FastMail(conf)
     await fm.send_message(message)

@@ -17,7 +17,7 @@ DB = os.getenv('POSTGRES_DB_TEST')
 
 SQLALCHEMY_DATABASE_URL = f'postgresql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}'
 
-print(f'postgresql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}')
+# print(f'postgresql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}')
 
 client = TestClient(app)
 
