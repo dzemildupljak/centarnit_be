@@ -1,8 +1,8 @@
-"""Added user/blog table
+"""Init migration
 
-Revision ID: 18b21de26275
+Revision ID: 623c06223e56
 Revises: 
-Create Date: 2021-04-27 15:20:26.460107
+Create Date: 2021-05-21 17:04:16.753186
 
 """
 from alembic import op
@@ -16,7 +16,7 @@ Session = sessionmaker()
 
 
 # revision identifiers, used by Alembic.
-revision = '18b21de26275'
+revision = '623c06223e56'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,6 +31,7 @@ def upgrade():
                     sa.Column('role', sa.String(), nullable=True),
                     sa.Column('username', sa.String(), nullable=True),
                     sa.Column('password', sa.String(), nullable=True),
+                    sa.Column('is_confirmed', sa.Boolean(), nullable=True),
                     sa.PrimaryKeyConstraint('id')
                     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
@@ -43,11 +44,13 @@ def upgrade():
                     sa.PrimaryKeyConstraint('id')
                     )
     op.create_index(op.f('ix_blogs_id'), 'blogs', ['id'], unique=False)
+    #################
     bind = op.get_bind()
     session = Session(bind=bind)
     hs_password = pwd_cxt.hash('sysadmin')
     insert_sysadmin_sql = "INSERT INTO USERS (NAME,EMAIL,ROLE,USERNAME,PASSWORD) VALUES ('sysadmin','sysadmin@mail.com', 'sysadmin','sysadmin','{var_password}')"
     session.execute(insert_sysadmin_sql.format(var_password=hs_password))
+    #################
     # ### end Alembic commands ###
 
 

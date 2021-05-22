@@ -1,15 +1,43 @@
+import os
 from fastapi import APIRouter, Depends, status, HTTPException
+from sqlalchemy.sql import roles
+from starlette.background import BackgroundTasks
+from starlette.responses import JSONResponse
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from blog.database import get_db
 from blog.models.user import User
 from blog.helpers.hashing import verify_hash
 from blog.helpers.JWToken import create_access_token
+from blog.schemas import email
+from fastapi_mail import FastMail, MessageSchema
+from blog.helpers.helper_conf import conf
 
 
 router = APIRouter(
     tags=['Authentication']
 )
+
+html = """
+            <p>Thanks for using Fastapi-mail JA SAM BABOO!!!</p> 
+        """
+
+
+@router.post("/email")
+async def simple_send(email: email.EmailSchema):
+
+    message = MessageSchema(
+        subject="Fastapi-Mail module",
+        # List of recipients, as many as you can pass
+        recipients=email.dict().get("email"),
+        body=html,
+        subtype="html"
+    )
+    print(30*'-', conf)
+
+    fm = FastMail(conf)
+    await fm.send_message(message)
+    return JSONResponse(status_code=200, content={"message": "email has been sent"})
 
 
 @router.post('/login')
@@ -27,3 +55,18 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
     access_token = create_access_token(
         data={'sub': user.username, 'role': user.role})
     return {"access_token": access_token}
+
+
+@router.get('/confirm/{id}/{password}')
+def confirm_user(id: int, password: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(
+        User.id == id)
+
+    if not user.first() and not verify_hash(password, user.password):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='User does not exists')
+
+    user.update({User.is_confirmed: True, User.role: 'user'})
+    db.commit()
+    raise HTTPException(status_code=status.HTTP_200_OK,
+                        detail=f'User with id {id} was confirmed')

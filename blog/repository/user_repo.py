@@ -22,9 +22,7 @@ def create_user(user_req: user.User, db: Session):
     try:
         new_user = user.User(name=user_req.name, email=user_req.email,
                              username=user_req.username, password=bycrpt_hash(
-                                 user_req.password),
-                             role='user')
-
+                                 user_req.password), role='')
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
@@ -56,3 +54,4 @@ def delete_user(id: int, db: Session):
                             detail=f'User with id {id} was not found')
     usr.delete(synchronize_session=False)
     db.commit()
+    return True
