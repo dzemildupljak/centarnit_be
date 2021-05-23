@@ -19,7 +19,7 @@ SERVER = os.getenv('POSTGRES_SERVER')
 PORT = os.getenv('POSTGRES_PORT')
 DB = os.getenv('POSTGRES_DB')
 
-SQLALCHEMY_DATABASE_URL = f'postgresql://fmnvesrfbkblja:f082dcd08fe0b9f0b2b2cced8089e0950ee5331717697c1f0602cd1d15b1c629@ec2-99-80-200-225.eu-west-1.compute.amazonaws.com:5432/de4o28kcohdor3'
+SQLALCHEMY_DATABASE_URL = "postgresql://fmnvesrfbkblja:f082dcd08fe0b9f0b2b2cced8089e0950ee5331717697c1f0602cd1d15b1c629@ec2-99-80-200-225.eu-west-1.compute.amazonaws.com:5432/de4o28kcohdor3"
 # SQLALCHEMY_DATABASE_URL = f'postgresql://{USER}:{PASSWORD}@{SERVER}:{PORT}/{DB}'
 
 engine = create_engine(
