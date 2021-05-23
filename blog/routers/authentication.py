@@ -56,16 +56,16 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
     return {"access_token": access_token}
 
 
-@router.get('/confirm/{id}/{password}')
-def confirm_user(id: int, password: str, db: Session = Depends(get_db)):
+@router.get('/confirm/{identifier}/{password}')
+def confirm_user(identifier: str, password: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(
-        User.id == id)
+        User.user_identifier == identifier)
 
-    if not user.first() and not verify_hash(password, user.password):
+    if not user.first() or user.first().password != password or user.first().user_identifier != identifier:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='User does not exists')
+                            detail=f'User with id {identifier} was not confirmed')
 
     user.update({User.is_confirmed: True, User.role: 'user'})
     db.commit()
     raise HTTPException(status_code=status.HTTP_200_OK,
-                        detail=f'User with id {id} was confirmed')
+                        detail=f'User with id {identifier} was confirmed')

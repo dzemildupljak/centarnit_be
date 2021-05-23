@@ -48,7 +48,7 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
             recipients=[new_user.email],
             body=f"""
                 <p>Thanks for using Fastapi-mail</p>
-                <p><a href="https://{fqdn}/confirm/{new_user.id}/{request.password}" target="_blank">Confirm here</a></p>
+                <p><a href="http://localhost:8000/confirm/{new_user.user_identifier}/{new_user.password}" target="_blank">Confirm here</a></p>
                 """,
             subtype="html"
         )

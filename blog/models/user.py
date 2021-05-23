@@ -8,6 +8,7 @@ from blog.models.blog import Blog
 class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
+    user_identifier = Column(String)
     name = Column(String)
     email = Column(String)
     role = Column(String)
