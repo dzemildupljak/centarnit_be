@@ -1,3 +1,4 @@
+import socket
 from fastapi.param_functions import Security
 from fastapi import APIRouter, Depends
 from typing import List
@@ -6,6 +7,7 @@ from fastapi_mail.schemas import MessageSchema
 from sqlalchemy.orm import Session
 from starlette import status
 from starlette.background import BackgroundTasks
+from starlette.requests import Request
 from starlette.responses import Response
 from blog.database import get_db
 from blog import schemas
@@ -28,7 +30,7 @@ def get_all_users(db: Session = Depends(get_db),
 
 
 @router.get('/{id}', response_model=schemas.user.ShowUser)
-def get_user_by_id(id: int, db: Session = Depends(get_db),
+def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db),
                    current_user: schemas.user.User =
                    Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
     return user_repo.get_user_by_id(id, db)
@@ -36,6 +38,9 @@ def get_user_by_id(id: int, db: Session = Depends(get_db),
 
 @router.post('/', response_model=schemas.user.ShowUser)
 async def create_user(request: schemas.user.CreateUser, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+
+    # Get the fully qualified domain name
+    fqdn = socket.getfqdn()
     new_user = user_repo.create_user(request, db)
     if new_user:
         message = MessageSchema(
@@ -43,7 +48,7 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
             recipients=[new_user.email],
             body=f"""
                 <p>Thanks for using Fastapi-mail</p>
-                <p><a href="https://centarnitbe.herokuapp.com/confirm/{new_user.id}/{request.password}" target="_blank">Confirm here</a></p>
+                <p><a href="https://{fqdn}/confirm/{new_user.id}/{request.password}" target="_blank">Confirm here</a></p>
                 """,
             subtype="html"
         )
