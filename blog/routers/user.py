@@ -1,4 +1,4 @@
-import socket
+import os
 from fastapi.param_functions import Security
 from fastapi import APIRouter, Depends
 from typing import List
@@ -15,6 +15,7 @@ from blog.repository import user_repo
 from blog.helpers.oaut2 import get_current_user
 from blog.helpers.helper_conf import conf
 
+HOST_DOMAIN = os.getenv('HOST_DOMAIN')
 
 router = APIRouter(
     prefix='/user',
@@ -38,9 +39,6 @@ def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db),
 
 @router.post('/', response_model=schemas.user.ShowUser)
 async def create_user(request: schemas.user.CreateUser, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-
-    # Get the fully qualified domain name
-    fqdn = socket.getfqdn()
     new_user = user_repo.create_user(request, db)
     if new_user:
         message = MessageSchema(
@@ -48,7 +46,7 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
             recipients=[new_user.email],
             body=f"""
                 <p>Thanks for using Fastapi-mail</p>
-                <p><a href="http://localhost:8000/confirm/{new_user.user_identifier}/{new_user.password}" target="_blank">Confirm here</a></p>
+                <p><a href="{HOST_DOMAIN}confirm/{new_user.user_identifier}/{new_user.password}" target="_blank">Confirm here</a></p>
                 """,
             subtype="html"
         )
@@ -59,13 +57,48 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
         return new_user
 
 
-@ router.put('/{id}/role/{role}')
+@router.get('/reset-password/{id}/{email}')
+def reset_password(id: int, email: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    usr = user_repo.get_user_by_id(id, db)
+    if usr and usr.email == email:
+        message = MessageSchema(
+            subject="Fastapi mail module",
+            recipients=[email],
+            body=f"""
+                <p>Thanks for using Fastapi-mail</p>
+                <p><a href="{HOST_DOMAIN}reset-password/confirm/{usr.user_identifier}" target="_blank">Confirm here</a></p>
+                """,
+            subtype="html"
+        )
+
+        fm = FastMail(conf)
+        background_tasks.add_task(fm.send_message, message)
+        return usr
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
+
+
+@router.post('/reset-password/confirm/{identifier}')
+def reset_password_confirm(identifier: str,  password: str, password_confirm: str, db: Session = Depends(get_db)):
+    if password == password_confirm:
+        usr = user_repo.get_user_by_identifier(identifier, db)
+        if user_repo.reset_password(usr.id, password, db):
+            return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
+
+
+@router.put('/{id}', response_model=schemas.user.ShowUser,)
+def update_user(id: int, request: schemas.user.ShowUser, db: Session = Depends(get_db),
+                current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+    return user_repo.update_user(id, request, db)
+
+
+@router.put('/{id}/role/{role}')
 def update_user_role(id: int, role: str, db: Session = Depends(get_db),
                      current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     return user_repo.update_user_role(id, role, db)
 
 
-@ router.delete('/{id}')
+@router.delete('/{id}')
 def delete_user(id: int, db: Session = Depends(get_db),
                 current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     if (user_repo.delete_user(id, db)):

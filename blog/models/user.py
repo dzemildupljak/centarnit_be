@@ -1,6 +1,7 @@
+from datetime import date, datetime
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql.sqltypes import Boolean
+from sqlalchemy.sql.sqltypes import Boolean, DateTime
 from blog.database import Base
 from blog.models.blog import Blog
 
@@ -15,4 +16,5 @@ class User(Base):
     username = Column(String)
     password = Column(String)
     is_confirmed = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=datetime.now(), nullable=True)
     blog = relationship(Blog, backref='author')

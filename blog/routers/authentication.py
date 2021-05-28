@@ -19,7 +19,7 @@ router = APIRouter(
 )
 
 html = """
-            <p>Thanks for using Fastapi-mail JA SAM BABOO!!!</p> 
+            <p>Thanks for using Fastapi-mail TEST MAIL!!!</p> 
         """
 
 
@@ -56,12 +56,12 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
     return {"access_token": access_token}
 
 
-@router.get('/confirm/{identifier}/{password}')
-def confirm_user(identifier: str, password: str, db: Session = Depends(get_db)):
+@router.get('/confirm/{identifier}')
+def confirm_user(identifier: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(
         User.user_identifier == identifier)
 
-    if not user.first() or user.first().password != password or user.first().user_identifier != identifier:
+    if not user.first() or user.first().user_identifier != identifier:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'User with id {identifier} was not confirmed')
 

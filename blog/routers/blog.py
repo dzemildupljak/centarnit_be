@@ -13,11 +13,16 @@ router = APIRouter(
 )
 
 
+@router.get('/', response_model=List[blog.ShowBlog])
+def get_all_blogs(db: Session = Depends(get_db)):
+    return blog_repo.get_all_blogs(db)
+
+
 @router.get('/{user_id}', response_model=List[blog.ShowBlog])
-def get_all_blogs(user_id: int, db: Session = Depends(get_db),
-                  current_user: user.User =
-                  Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    return blog_repo.get_all_blogs(user_id, db)
+def get_all_my_blogs(user_id: int, db: Session = Depends(get_db),
+                     current_user: user.User =
+                     Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+    return blog_repo.get_all_blogs_by_author(user_id, db)
 
 
 @router.get('/{id}', status_code=status.HTTP_200_OK, response_model=blog.ShowBlog)

@@ -19,6 +19,16 @@ def get_user_by_id(id: int, db: Session):
     return usr
 
 
+def get_user_by_identifier(identifier: int, db: Session):
+    usr = db.query(user.User).where(
+        user.User.user_identifier == identifier).first()
+    if not usr:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User was not found')
+
+    return usr
+
+
 def create_user(user_req: user.User, db: Session):
     try:
         new_user = user.User(name=user_req.name, email=user_req.email,
@@ -46,6 +56,27 @@ def update_user_role(id: int, rle: str, db: Session):
                             detail=f'User with id {id} was updated')
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f'User with id {id} was not updated')
+
+
+def update_user(id: int, updated_user,  db: Session):
+    usr = db.query(user.User).filter(user.User.id == id)
+    if not usr.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {id} was not found')
+    usr.update(dict(updated_user))
+    db.commit()
+    db.refresh(usr)
+    return usr
+
+
+def reset_password(id: int, new_password,  db: Session):
+    usr = db.query(user.User).filter(user.User.id == id)
+    if not usr.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {id} was not found')
+    usr.update({user.User.password: new_password})
+    db.commit()
+    return True
 
 
 def delete_user(id: int, db: Session):
