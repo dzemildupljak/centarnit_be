@@ -52,7 +52,7 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
                             detail='Invalid credentials1')
 
     access_token = create_access_token(
-        data={'sub': user.username, 'role': user.role})
+        data={'sub': user.username, 'id': user.id, 'role': user.role})
     return {"access_token": access_token}
 
 

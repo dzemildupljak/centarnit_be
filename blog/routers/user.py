@@ -37,6 +37,13 @@ def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db),
     return user_repo.get_user_by_id(id, db)
 
 
+@router.get('/current/{token}', response_model=schemas.user.ShowUser)
+def get_current_user_by_id(token: str, db: Session = Depends(get_db),
+                           current_user: schemas.user.User =
+                           Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+    return user_repo.get_current_user_by_id(token, db)
+
+
 @router.post('/', response_model=schemas.user.ShowUser)
 async def create_user(request: schemas.user.CreateUser, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     new_user = user_repo.create_user(request, db)
@@ -46,7 +53,7 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
             recipients=[new_user.email],
             body=f"""
                 <p>Thanks for using Fastapi-mail</p>
-                <p><a href="{HOST_DOMAIN}confirm/{new_user.user_identifier}/{new_user.password}" target="_blank">Confirm here</a></p>
+                <p><a href="{HOST_DOMAIN}confirm/{new_user.user_identifier}" target="_blank">Confirm here</a></p>
                 """,
             subtype="html"
         )
