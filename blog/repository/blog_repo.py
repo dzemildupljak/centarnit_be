@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import mode
 from blog import models, schemas
 
 
@@ -32,8 +33,9 @@ def create_blog(blog: schemas.blog.CreateBlog, db: Session):
     return new_blog
 
 
-def update_blog(id: int, blog_req: schemas.blog.Blog, db: Session):
-    blog = db.query(models.blog.Blog).filter(models.blog.Blog.id == id)
+def update_blog(author_id: int, blog_id: int, blog_req: schemas.blog.Blog, db: Session):
+    blog = db.query(models.blog.Blog).filter(
+        models.blog.Blog.id == blog_id, models.blog.Blog.user_id == author_id)
     if not blog.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f"Blog with id {id} not found")

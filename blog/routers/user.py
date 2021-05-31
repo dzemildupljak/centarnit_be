@@ -38,10 +38,11 @@ def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db),
 
 
 @router.get('/current/{token}', response_model=schemas.user.ShowUser)
-def get_current_user_by_id(token: str, db: Session = Depends(get_db),
+def get_current_user_by_id(req: Request, db: Session = Depends(get_db),
                            current_user: schemas.user.User =
                            Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    return user_repo.get_current_user_by_id(token, db)
+    print(req.headers['authorization'].split(' '))
+    return user_repo.get_current_user_by_id(req.headers['authorization'].split(' ')[1], db)
 
 
 @router.post('/', response_model=schemas.user.ShowUser)

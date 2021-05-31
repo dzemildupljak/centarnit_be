@@ -25,7 +25,7 @@ def get_all_my_blogs(user_id: int, db: Session = Depends(get_db),
     return blog_repo.get_all_blogs_by_author(user_id, db)
 
 
-@router.get('/{id}', status_code=status.HTTP_200_OK, response_model=blog.ShowBlog)
+@router.get('/id/{id}', status_code=status.HTTP_200_OK, response_model=blog.ShowBlog)
 def get_blog_by_id(id: int, db: Session = Depends(get_db),
                    current_user: user.User =
                    Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
@@ -39,15 +39,15 @@ def create_blog(request: blog.CreateBlog, db: Session = Depends(get_db),
     return blog_repo.create_blog(request, db)
 
 
-@router.put('/{id}', status_code=status.HTTP_202_ACCEPTED)
-def update_blog(id: int, request: blog.Blog, db: Session = Depends(get_db),
+@router.put('/{author_id}/{blog_id}', status_code=status.HTTP_202_ACCEPTED)
+def update_blog(author_id: int, blog_id: int, request: blog.Blog, db: Session = Depends(get_db),
                 current_user: user.User =
                 Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    return blog_repo.update_blog(id, request, db)
+    return blog_repo.update_blog(author_id, blog_id, request, db)
 
 
-@router.delete('/{id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_blog(id: int, db: Session = Depends(get_db),
+@router.delete('/{author_id}/{blog_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_blog(author_id: int, blog_id: int, db: Session = Depends(get_db),
                 current_user: user.User =
                 Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    return blog_repo.delete_blog(id, db)
+    return blog_repo.delete_blog(author_id, blog_id, db)
