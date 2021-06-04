@@ -37,10 +37,10 @@ def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db),
     return user_repo.get_user_by_id(id, db)
 
 
-@router.get('/current/{token}', response_model=schemas.user.ShowUser)
-def get_current_user_by_id(req: Request, db: Session = Depends(get_db),
-                           current_user: schemas.user.User =
-                           Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+@router.get('/current/', response_model=schemas.user.ShowUser)
+def get_current_user(req: Request, db: Session = Depends(get_db),
+                     current_user: schemas.user.User =
+                     Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
     print(req.headers['authorization'].split(' '))
     return user_repo.get_current_user_by_id(req.headers['authorization'].split(' ')[1], db)
 
@@ -53,8 +53,8 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
             subject="Fastapi mail module",
             recipients=[new_user.email],
             body=f"""
-                <p>Thanks for using Fastapi-mail</p>
-                <p><a href="{HOST_DOMAIN}confirm/{new_user.user_identifier}" target="_blank">Confirm here</a></p>
+                <p>Thanks for using our aplication</p>
+                <p>Confirm your account <a href="{HOST_DOMAIN}confirm/{new_user.user_identifier}" target="_blank">here</a></p>
                 """,
             subtype="html"
         )

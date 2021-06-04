@@ -24,6 +24,16 @@ def get_blog_by_id(id: int, db: Session):
     return blog
 
 
+def get_my_blog_by_id(id: int, author_id: int, db: Session):
+    blog = db.query(models.blog.Blog).where(models.blog.Blog.id ==
+                                            id, models.blog.Blog.user_id == author_id).first()
+    if not blog:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'blog with id {id} was not found')
+
+    return blog
+
+
 def create_blog(blog: schemas.blog.CreateBlog, db: Session):
     new_blog = models.blog.Blog(title=blog.title,
                                 body=blog.body, user_id=blog.author)

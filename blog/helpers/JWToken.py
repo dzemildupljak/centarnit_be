@@ -6,6 +6,7 @@ from fastapi.security.oauth2 import SecurityScopes
 from jose import jwt
 from jose.exceptions import JWTError
 from starlette import status
+from starlette.requests import Request
 
 SECRET_KEY = str(os.getenv('SECRET_KEY'))
 ALGORITHM = str(os.getenv('ALGORITHM'))
@@ -49,3 +50,9 @@ def verify_token(tkn: str, role: SecurityScopes):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def get_user_id_from_request_jwt(req: Request):
+    payload = jwt.decode(req.headers['authorization'].
+                         split(' ')[1], SECRET_KEY, algorithms=[ALGORITHM])
+    return dict(payload)['id']

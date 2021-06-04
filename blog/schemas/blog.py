@@ -8,6 +8,11 @@ class Blog(BaseModel):
     body: str
 
 
+class UpdateBlog(BaseModel):
+    title: str
+    body: str
+
+
 class CreateBlog(BaseModel):
     title: str
     body: str
