@@ -1,13 +1,14 @@
-from blog.helpers.JWToken import get_user_id_from_request_jwt
+from user.helpers.JWToken import get_user_id_from_request_jwt
 from fastapi import APIRouter, Depends, status
 from typing import List
 from fastapi.param_functions import Security
 from sqlalchemy.orm import Session
 from starlette.requests import Request
-from blog.database import get_db
-from blog.schemas import blog, user
+from database import get_db
+from blog.schemas import blog
+from user.schemas import user
 from blog.repository import blog_repo
-from blog.helpers.oaut2 import get_current_user
+from user.helpers.oaut2 import get_current_user
 
 router = APIRouter(
     prefix='/blog',

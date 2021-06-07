@@ -1,7 +1,6 @@
 from fastapi_mail import ConnectionConfig
 
 conf = ConnectionConfig(
-    # MAIL_USERNAME="centarnitnp@gmail.com",
     MAIL_USERNAME="centarnitnp@gmail.com",
     MAIL_PASSWORD='centarnitnp11',
     MAIL_FROM="centarnitnp@gmail.com",

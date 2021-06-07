@@ -1,11 +1,13 @@
 import os
-from blog import models
+from blog import models as blog_models
+from user import models as user_models
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool, MetaData
 
 from alembic import context
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -40,9 +42,14 @@ def combine_metadata():
     # from blog import models  # models file into which all models are imported
     # from sqlalchemy import MetaData
     model_classes = []
-    for model_name in models.__all__:
-        model_classes.append(getattr(models, model_name))
+    for model_name in user_models.__all__:
+        model_classes.append(getattr(user_models, model_name))
     m = MetaData()
+    for model in model_classes:
+        for t in model.metadata.tables.values():
+            t.tometadata(m)
+    for model_name in blog_models.__all__:
+        model_classes.append(getattr(blog_models, model_name))
     for model in model_classes:
         for t in model.metadata.tables.values():
             t.tometadata(m)
