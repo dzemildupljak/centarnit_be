@@ -7,7 +7,7 @@ from user.main import user_router
 
 app = FastAPI()
 
-# Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)
 
 app.add_middleware(
     CORSMiddleware,
