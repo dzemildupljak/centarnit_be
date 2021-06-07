@@ -1,4 +1,5 @@
 import os
+from user.helpers.JWToken import get_user_id_from_request_jwt
 from fastapi.param_functions import Security
 from fastapi import APIRouter, Depends
 from typing import List
@@ -9,11 +10,11 @@ from starlette import status
 from starlette.background import BackgroundTasks
 from starlette.requests import Request
 from starlette.responses import Response
-from blog.database import get_db
-from blog import schemas
-from blog.repository import user_repo
-from blog.helpers.oaut2 import get_current_user
-from blog.helpers.helper_conf import conf
+from database import get_db
+from user import schemas
+from user.repository import user_repo
+from user.helpers.oaut2 import get_current_user
+from user.helpers.helper_conf import conf
 
 HOST_DOMAIN = os.getenv('HOST_DOMAIN')
 
@@ -23,11 +24,18 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=List[schemas.user.ShowUser])
+@router.get('/all', response_model=List[schemas.user.ShowActiveUser])
 def get_all_users(db: Session = Depends(get_db),
                   current_user: schemas.user.User =
                   Security(get_current_user, scopes=['sysadmin', 'admin'])):
     return user_repo.get_all_users(db)
+
+
+@router.get('/all/active', response_model=List[schemas.user.ShowActiveUser])
+def get_all_active_users(db: Session = Depends(get_db),
+                         current_user: schemas.user.User =
+                         Security(get_current_user, scopes=['sysadmin', 'admin'])):
+    return user_repo.get_all_active_users(db)
 
 
 @router.get('/{id}', response_model=schemas.user.ShowUser)
@@ -38,11 +46,10 @@ def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db),
 
 
 @router.get('/current/', response_model=schemas.user.ShowUser)
-def get_current_user(req: Request, db: Session = Depends(get_db),
-                     current_user: schemas.user.User =
-                     Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    print(req.headers['authorization'].split(' '))
-    return user_repo.get_current_user_by_id(req.headers['authorization'].split(' ')[1], db)
+def get_current_logged_user(req: Request, db: Session = Depends(get_db),
+                            current_user: schemas.user.User =
+                            Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+    return user_repo.get_current_user_by_id(get_user_id_from_request_jwt(req), db)
 
 
 @router.post('/', response_model=schemas.user.ShowUser)
@@ -54,7 +61,7 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
             recipients=[new_user.email],
             body=f"""
                 <p>Thanks for using our aplication</p>
-                <p>Confirm your account <a href="{HOST_DOMAIN}confirm/{new_user.user_identifier}" target="_blank">here</a></p>
+                <p>Confirm your account <a href="{HOST_DOMAIN}auth/confirm/{new_user.user_identifier}" target="_blank">here</a></p>
                 """,
             subtype="html"
         )
@@ -94,10 +101,20 @@ def reset_password_confirm(identifier: str,  password: str, password_confirm: st
     return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.put('/{id}', response_model=schemas.user.ShowUser,)
-def update_user(id: int, request: schemas.user.ShowUser, db: Session = Depends(get_db),
+@router.put('/', response_model=schemas.user.ShowUser,)
+def update_user(request: schemas.user.EditUser, req: Request, db: Session = Depends(get_db),
                 current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    return user_repo.update_user(id, request, db)
+    if not (user_repo.update_user(get_user_id_from_request_jwt(req), request, db)):
+        return Response(status_code=status.HTTP_404_NOT_FOUND)
+    return user_repo.get_user_by_id(get_user_id_from_request_jwt(req), db)
+
+
+@router.put('/{id}', response_model=schemas.user.ShowUser,)
+def update_any_user(id: int, request: schemas.user.EditUser, db: Session = Depends(get_db),
+                    current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
+    if not (user_repo.update_user(id, request, db)):
+        return Response(status_code=status.HTTP_404_NOT_FOUND)
+    return user_repo.get_user_by_id(id, db)
 
 
 @router.put('/{id}/role/{role}')
@@ -110,5 +127,13 @@ def update_user_role(id: int, role: str, db: Session = Depends(get_db),
 def delete_user(id: int, db: Session = Depends(get_db),
                 current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     if (user_repo.delete_user(id, db)):
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_404_NOT_FOUND)
+
+
+@router.delete('/hard_delete/{id}')
+def delete_user(id: int, db: Session = Depends(get_db),
+                current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
+    if (user_repo.hard_delete_user(id, db)):
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     return Response(status_code=status.HTTP_404_NOT_FOUND)

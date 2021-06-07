@@ -2,9 +2,9 @@ import os
 import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-from blog.helpers.hashing import bycrpt_hash
+from user.helpers.hashing import bycrpt_hash
 from jose import jwt
-from blog.models import user
+from user.models import user
 
 SECRET_KEY = str(os.getenv('SECRET_KEY'))
 ALGORITHM = str(os.getenv('ALGORITHM'))
@@ -13,6 +13,11 @@ ACCESS_TOKEN_EXPIRE_MINUTES = str(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 
 def get_all_users(db: Session):
     users = db.query(user.User).all()
+    return users
+
+
+def get_all_active_users(db: Session):
+    users = db.query(user.User).filter(user.User.is_active == True).all()
     return users
 
 
@@ -63,29 +68,28 @@ def create_user(user_req: user.User, db: Session):
 
 
 def update_user_role(id: int, rle: str, db: Session):
-    if rle not in ('admin', 'user', 'author', 'sysadmin'):
+    if rle not in ('admin', 'user', 'author'):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail='Cannot assign this role')
     usr = db.query(user.User).filter(
-        user.User.id == id)
-    if usr.first() and usr.first().role != rle:
-        usr.update({user.User.role: rle})
-        db.commit()
-        raise HTTPException(status_code=status.HTTP_200_OK,
-                            detail=f'User with id {id} was updated')
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                        detail=f'User with id {id} was not updated')
+        user.User.id == id, user.User.role != rle).update({user.User.role: rle})
+    if not usr:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {id} was not updated')
+    db.commit()
+    raise HTTPException(status_code=status.HTTP_200_OK,
+                        detail=f'User with id {id} was updated')
 
 
 def update_user(id: int, updated_user,  db: Session):
-    usr = db.query(user.User).filter(user.User.id == id)
-    if not usr.first():
+    usr = db.query(user.User).filter(
+        user.User.id == id).update(dict(updated_user))
+
+    if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'User with id {id} was not found')
-    usr.update(dict(updated_user))
     db.commit()
-    db.refresh(usr)
-    return usr
+    return True
 
 
 def reset_password(id: int, new_password,  db: Session):
@@ -99,6 +103,16 @@ def reset_password(id: int, new_password,  db: Session):
 
 
 def delete_user(id: int, db: Session):
+    usr = db.query(user.User).filter(
+        user.User.id == id).update({user.User.is_active: False})
+    if not usr:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {id} was not found')
+    db.commit()
+    return usr
+
+
+def hard_delete_user(id: int, db: Session):
     usr = db.query(user.User).filter(user.User.id == id)
     if not usr.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

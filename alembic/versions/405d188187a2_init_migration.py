@@ -26,6 +26,7 @@ def upgrade():
                     sa.Column('role', sa.String(), nullable=True),
                     sa.Column('username', sa.String(), nullable=True),
                     sa.Column('password', sa.String(), nullable=True),
+                    sa.Column('is_active', sa.Boolean(), nullable=False),
                     sa.Column('is_confirmed', sa.Boolean(), nullable=False),
                     sa.Column('created_at', sa.DateTime(), nullable=True),
                     sa.PrimaryKeyConstraint('id')
@@ -42,13 +43,13 @@ def upgrade():
     op.create_index(op.f('ix_blogs_id'), 'blogs', ['id'], unique=False)
 
     from sqlalchemy.orm import Session
-    from blog.helpers.hashing import pwd_cxt
+    from user.helpers.hashing import pwd_cxt
 
     # # #################
     bind = op.get_bind()
     session = Session(bind=bind)
     hs_password = pwd_cxt.hash('sysadmin')
-    insert_sysadmin_sql = "INSERT INTO USERS (NAME,EMAIL,ROLE,USERNAME,PASSWORD,CREATED_AT,IS_CONFIRMED) VALUES ('sysadmin','sysadmin@mail.com', 'sysadmin','sysadmin','{var_password}',NOW(), true)"
+    insert_sysadmin_sql = "INSERT INTO USERS (NAME,EMAIL,ROLE,USERNAME,PASSWORD,CREATED_AT,IS_CONFIRMED,IS_ACTIVE) VALUES ('sysadmin','sysadmin@mail.com', 'sysadmin','sysadmin','{var_password}',NOW(), true, true)"
     session.execute(insert_sysadmin_sql.format(var_password=hs_password))
     # # #################
     # ### end Alembic commands ###
