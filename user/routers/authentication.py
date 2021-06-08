@@ -14,11 +14,10 @@ router = APIRouter(
     tags=['Authentication']
 )
 
-html = """
-            <p>Thanks for using Fastapi-mail TEST MAIL!!!</p> 
-        """
 
-
+# html = """
+#             <p>Thanks for using Fastapi-mail TEST MAIL!!!</p>
+#         """
 # @router.post("/email")
 # async def simple_send(email: email.EmailSchema):
 
@@ -37,6 +36,15 @@ html = """
 
 @router.post('/login')
 def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    try:
+        schemas.user.Login(
+            username=request.username,
+            password=request.password
+        )
+    except ValidationError as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Invalid password validation')
     user = db.query(User).filter(
         User.username == request.username).first()
     if not user:

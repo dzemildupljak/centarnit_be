@@ -1,5 +1,4 @@
-from sqlalchemy import engine
-from database import Base
+from database import Base, engine
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from blog.main import blog_router
@@ -8,6 +7,7 @@ from user.main import user_router
 app = FastAPI()
 
 Base.metadata.create_all(engine)
+
 
 app.add_middleware(
     CORSMiddleware,

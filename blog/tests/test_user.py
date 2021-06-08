@@ -1,9 +1,9 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from blog.database import get_db, Base
-from blog.main import app
-from blog.helpers.JWToken import fake_secret_token
+from database import get_db, Base
+from main import app
+from user.helpers.JWToken import fake_secret_token
 import os
 from dotenv import load_dotenv
 import pytest

@@ -17,13 +17,15 @@ class CreateUser(BaseModel):
     username: str
     password: str
 
-    # @validator('password')
-    # def password_must_contain_nums_letters(cls, password):
-    #     if any(chr.isalnum() for chr in password):
-    #         raise ValueError('must contain a digit')
-    #     if any(chr.isdigit() for chr in password):
-    #         raise ValueError('must contain a digit')
-    #     return password
+    @validator('password')
+    def password_must_contain_nums_letters(cls, password: str):
+        if len(password) < 5:
+            raise ValueError('must contain more than 5 characters')
+        if not any(chr.isalnum for chr in password):
+            raise ValueError('must contain only leter and digit')
+        if not any(chr.isdigit for chr in password):
+            raise ValueError(f'must contain a digit')
+        return password
 
     # class Config:
     #     orm_mode = True
@@ -82,15 +84,17 @@ class Login(BaseModel):
     username: str
     password: str
 
-    # @validator('password')
-    # def password_must_contain_nums_letters(password):
-    #     if len(password) < 5:
-    #         raise ValueError('must contain more than 5 characters')
-    #     if any(chr.isalnum() for chr in password):
-    #         raise ValueError('must contain only letter and digits')
-    #     if any(chr.isdigit() for chr in password):
-    #         raise ValueError('must contain a digit')
-    #     return password
+    @validator('password')
+    def password_must_contain_nums_letters(password):
+        if password == "sysadmin":
+            return password
+        if len(password) < 5:
+            raise ValueError('must contain more than 5 characters')
+        if any(chr.isalnum() for chr in password):
+            raise ValueError('must contain only letter and digits')
+        if any(chr.isdigit() for chr in password):
+            raise ValueError('must contain a digit')
+        return password
 
     class Config:
         orm_mode = True

@@ -1,4 +1,6 @@
 import os
+from fastapi.exceptions import HTTPException
+from pydantic.error_wrappers import ValidationError
 from user.helpers.JWToken import get_user_id_from_request_jwt
 from fastapi.param_functions import Security
 from fastapi import APIRouter, Depends
@@ -54,6 +56,18 @@ def get_current_logged_user(req: Request, db: Session = Depends(get_db),
 
 @router.post('/', response_model=schemas.user.ShowUser)
 async def create_user(request: schemas.user.CreateUser, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    try:
+        schemas.user.CreateUser(
+            name=request.name,
+            email=request.email,
+            username=request.username,
+            password=request.password
+
+        )
+    except ValidationError as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Invalid password validation')
     new_user = user_repo.create_user(request, db)
     if new_user:
         message = MessageSchema(
