@@ -67,7 +67,7 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
     except ValidationError as e:
         print(e)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Invalid password validation')
+                            detail='Invalid login validation')
     new_user = user_repo.create_user(request, db)
     if new_user:
         message = MessageSchema(
@@ -146,8 +146,8 @@ def delete_user(id: int, db: Session = Depends(get_db),
 
 
 @router.delete('/hard_delete/{id}')
-def delete_user(id: int, db: Session = Depends(get_db),
-                current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
+def hard_delete_user(id: int, db: Session = Depends(get_db),
+                     current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     if (user_repo.hard_delete_user(id, db)):
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     return Response(status_code=status.HTTP_404_NOT_FOUND)

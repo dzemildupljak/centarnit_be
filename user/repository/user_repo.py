@@ -30,12 +30,11 @@ def get_user_by_id(id: int, db: Session):
     return usr
 
 
-def get_current_user_by_id(tkn: str, db: Session):
-    payload = dict(jwt.decode(tkn, SECRET_KEY, algorithms=[ALGORITHM]))
-    usr = db.query(user.User).where(user.User.id == payload['id']).first()
+def get_current_user_by_id(user_id: int, db: Session):
+    usr = db.query(user.User).where(user.User.id == user_id).first()
     if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'User with id {payload["id"]} was not found')
+                            detail=f'User with id {user_id} was not found')
 
     return usr
 

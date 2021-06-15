@@ -49,7 +49,7 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
         User.username == request.username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Invalid credentials')
+                            detail='Invalid credentials123')
 
     if not verify_hash(request.password, user.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -58,6 +58,8 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
     access_token = create_access_token(
         data={'sub': user.username, 'id': user.id, 'role': user.role})
     return {"access_token": access_token}
+
+# COFIRMATION CODE for confirmation user !!!!
 
 
 @router.get('/confirm/{identifier}')

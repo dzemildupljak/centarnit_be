@@ -10,11 +10,11 @@ class User(Base):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True, index=True)
     user_identifier = Column(String)
-    name = Column(String)
+    name = Column(String, nullable=False)
     email = Column(String, unique=True)
     role = Column(String)
     username = Column(String, unique=True)
-    password = Column(String)
+    password = Column(String, nullable=False)
     is_active = Column(Boolean, default=False, nullable=False)
     is_confirmed = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.now(), nullable=True)

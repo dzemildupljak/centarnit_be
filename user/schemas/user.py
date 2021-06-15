@@ -85,14 +85,15 @@ class Login(BaseModel):
     password: str
 
     @validator('password')
-    def password_must_contain_nums_letters(password):
+    def password_must_contain_nums_letters(password: str):
         if password == "sysadmin":
             return password
         if len(password) < 5:
             raise ValueError('must contain more than 5 characters')
-        if any(chr.isalnum() for chr in password):
+        # if any(chr.isalnum() for chr in password):
+        if not any(chr.isalnum() for chr in password):
             raise ValueError('must contain only letter and digits')
-        if any(chr.isdigit() for chr in password):
+        if not any(chr.isdigit() for chr in password):
             raise ValueError('must contain a digit')
         return password
 
