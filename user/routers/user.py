@@ -1,6 +1,5 @@
 import os
 import msgpack
-import user
 from user.helpers.helpers import generate_ot_confirmation_code
 from fastapi.exceptions import HTTPException
 from pydantic.error_wrappers import ValidationError
