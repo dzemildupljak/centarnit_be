@@ -12,6 +12,7 @@ class User(Base):
     user_identifier = Column(String)
     name = Column(String, nullable=False)
     email = Column(String, unique=True)
+    phone_number = Column(String)
     role = Column(String)
     username = Column(String, unique=True)
     password = Column(String, nullable=False)

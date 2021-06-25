@@ -30,6 +30,24 @@ def get_user_by_id(id: int, db: Session):
     return usr
 
 
+def get_user_by_email(email: str, db: Session) -> user.User:
+    usr = db.query(user.User).where(user.User.email == email).first()
+    if not usr:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {id} was not found')
+
+    return usr
+
+
+def get_user_by_username(username: str, db: Session) -> user.User:
+    usr = db.query(user.User).where(user.User.username == username).first()
+    if not usr:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {id} was not found')
+
+    return usr
+
+
 def get_current_user_by_id(user_id: int, db: Session):
     usr = db.query(user.User).where(user.User.id == user_id).first()
     if not usr:
@@ -92,6 +110,16 @@ def update_user(id: int, updated_user,  db: Session):
 
 
 def reset_password(id: int, new_password,  db: Session):
+    usr = db.query(user.User).filter(user.User.id == id)
+    if not usr.first():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {id} was not found')
+    usr.update({user.User.password: new_password})
+    db.commit()
+    return True
+
+
+def code_reset_password(code: int, new_password,  db: Session):
     usr = db.query(user.User).filter(user.User.id == id)
     if not usr.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

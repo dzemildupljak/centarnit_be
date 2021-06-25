@@ -6,6 +6,9 @@ from base64 import b64encode
 # print(30*'-')
 # print(token_hex(32))
 
+# from random import randint
+# print(randint(1_000_000, 1_000_000_000_000))
+
 
 pwd_cxt = CryptContext(schemes=['bcrypt'], deprecated='auto')
 

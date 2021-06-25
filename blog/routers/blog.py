@@ -43,10 +43,10 @@ def get_my_blog_by_id(id: int, req: Request, db: Session = Depends(get_db),
 
 
 @router.post('/', status_code=status.HTTP_201_CREATED)
-def create_blog(request: blog.CreateBlog, db: Session = Depends(get_db),
+def create_blog(request: blog.CreateBlog, req: Request, db: Session = Depends(get_db),
                 current_user: user.User =
                 Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    return blog_repo.create_blog(request, db)
+    return blog_repo.create_blog(get_user_id_from_request_jwt(req), request, db)
 
 
 @router.put('/{blog_id}', status_code=status.HTTP_202_ACCEPTED)

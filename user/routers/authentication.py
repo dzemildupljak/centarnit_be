@@ -1,3 +1,7 @@
+import datetime
+from typing import Optional
+from user.helpers.helpers import get_time_between
+from user.repository import user_repo
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -7,7 +11,7 @@ from user.models.user import User
 from user.helpers.hashing import verify_hash
 from user.helpers.JWToken import create_access_token
 from pydantic import ValidationError
-
+import msgpack
 
 router = APIRouter(
     prefix='/auth',
@@ -42,7 +46,6 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
             password=request.password
         )
     except ValidationError as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='Invalid password validation')
     user = db.query(User).filter(
@@ -59,8 +62,6 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
         data={'sub': user.username, 'id': user.id, 'role': user.role})
     return {"access_token": access_token}
 
-# COFIRMATION CODE for confirmation user !!!!
-
 
 @router.get('/confirm/{identifier}')
 def confirm_user(identifier: str, db: Session = Depends(get_db)):
@@ -75,3 +76,36 @@ def confirm_user(identifier: str, db: Session = Depends(get_db)):
     db.commit()
     raise HTTPException(status_code=status.HTTP_200_OK,
                         detail=f'User with id {identifier} was confirmed')
+
+
+@router.get('/confirm/code/{confirmation_code}')
+def confirm_user_by_code(confirmation_code: str, username: Optional[str] = None, email: Optional[str] = None,  db: Session = Depends(get_db)):
+    if username:
+        usr = user_repo.get_user_by_username(username, db)
+    else:
+        usr = user_repo.get_user_by_username(email, db)
+    try:
+        with open('stream.msgpack', 'rb') as f:
+            load_items = [item for item in msgpack.Unpacker(f)]
+    except:
+        pass
+
+    for i in load_items:
+        if (i['email'] == usr.email
+                and get_time_between(datetime.datetime.strptime(i['time'], "%Y-%m-%d %H:%M:%S.%f"), datetime.datetime.now()) < 60
+                and i['code'] == confirmation_code):
+            del i
+            user_repo.update_user_role(usr.id, 'user', db)
+
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f'User was not updated')
+
+
+# @router.get('/confirm/mail/{user_mail}/code/{confirmation_code}')
+# def confirm_user_code(user_mail: str, confirmation_code: str, db: Session = Depends(get_db)):
+#     user = db.query(User).filter(
+#         User.email == user_mail)
+
+#     if not user.first():
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail=f'User was not confirmed')

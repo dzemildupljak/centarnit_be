@@ -33,9 +33,9 @@ def get_my_blog_by_id(id: int, author_id: int, db: Session):
     return blog
 
 
-def create_blog(blog: schemas.blog.CreateBlog, db: Session):
+def create_blog(author_id: int, blog: schemas.blog.CreateBlog, db: Session):
     new_blog = models.blog.Blog(title=blog.title,
-                                body=blog.body, user_id=blog.author)
+                                body=blog.body, user_id=author_id)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)

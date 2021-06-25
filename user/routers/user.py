@@ -1,10 +1,13 @@
 import os
+import msgpack
+import user
+from user.helpers.helpers import generate_ot_confirmation_code
 from fastapi.exceptions import HTTPException
 from pydantic.error_wrappers import ValidationError
 from user.helpers.JWToken import get_user_id_from_request_jwt
 from fastapi.param_functions import Security
 from fastapi import APIRouter, Depends
-from typing import List
+from typing import List, Optional
 from fastapi_mail.fastmail import FastMail
 from fastapi_mail.schemas import MessageSchema
 from sqlalchemy.orm import Session
@@ -65,25 +68,85 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
 
         )
     except ValidationError as e:
-        print(e)
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail='Invalid login validation')
     new_user = user_repo.create_user(request, db)
     if new_user:
-        message = MessageSchema(
-            subject="Fastapi mail module",
-            recipients=[new_user.email],
-            body=f"""
-                <p>Thanks for using our aplication</p>
-                <p>Confirm your account <a href="{HOST_DOMAIN}auth/confirm/{new_user.user_identifier}" target="_blank">here</a></p>
-                """,
-            subtype="html"
-        )
+        # message = MessageSchema(
+        #     subject="Fastapi mail module",
+        #     recipients=[new_user.email],
+        #     body=f"""
+        #         <p>Thanks for using our aplication</p>
+        #         <p>Confirm your account <a href="{HOST_DOMAIN}auth/confirm/{new_user.user_identifier}" target="_blank">here</a></p>
+        #         """,
+        #     subtype="html"
+        # )
 
-        fm = FastMail(conf)
+        # fm = FastMail(conf)
 
-        background_tasks.add_task(fm.send_message, message)
+        # background_tasks.add_task(fm.send_message, message)
+        # load_items = []
+        # try:
+        #     with open('stream.msgpack', 'rb') as f:
+        #         load_items = [item for item in msgpack.Unpacker(f)]
+        # except:
+        #     pass
+
+        # load_items.append(
+        #     {
+        #         'code': generate_ot_confirmation_code(new_user.created_at),
+        #         'email': new_user.email,
+        #         'time': str(new_user.created_at)
+        #     }
+        # )
+        # with open('stream.msgpack', 'wb') as f:
+        #     for i in load_items:
+        #         f.write(msgpack.packb(i))
         return new_user
+
+
+@router.get('/confirm-user/email/{email}')
+def req_confirmation_by_email(email: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    usr = user_repo.get_user_by_email(email, db)
+    if not usr:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail='Invalid login validation')
+    message = MessageSchema(
+        subject="Fastapi mail module",
+        recipients=[usr.email],
+        body=f"""
+                <p>Thanks for using our aplication</p>
+                <p>Confirm your account <a href="{HOST_DOMAIN}auth/confirm/{usr.user_identifier}" target="_blank">here</a></p>
+                """,
+        subtype="html"
+    )
+
+    fm = FastMail(conf)
+
+    background_tasks.add_task(fm.send_message, message)
+
+
+@router.get('/confirm-user/code/')
+def req_confirmation_by_code(background_tasks: BackgroundTasks, email: Optional[str] = None, usernane: Optional[str] = None, db: Session = Depends(get_db)):
+    load_items = []
+    new_user = user_repo.get_user_by_email(email, db)
+    try:
+        with open('stream.msgpack', 'rb') as f:
+            load_items = [item for item in msgpack.Unpacker(f)]
+    except:
+        pass
+
+    load_items.append(
+        {
+            'code': generate_ot_confirmation_code(new_user.created_at),
+            'email': new_user.email,
+            'time': str(new_user.created_at)
+        }
+    )
+    with open('stream.msgpack', 'wb') as f:
+        for i in load_items:
+            f.write(msgpack.packb(i))
+    return new_user
 
 
 @router.get('/reset-password/{id}/{email}')
@@ -106,7 +169,7 @@ def reset_password(id: int, email: str, background_tasks: BackgroundTasks, db: S
     return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.post('/reset-password/confirm/{identifier}')
+@ router.post('/reset-password/confirm/{identifier}')
 def reset_password_confirm(identifier: str,  password: str, password_confirm: str, db: Session = Depends(get_db)):
     if password == password_confirm:
         usr = user_repo.get_user_by_identifier(identifier, db)
@@ -115,7 +178,7 @@ def reset_password_confirm(identifier: str,  password: str, password_confirm: st
     return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.put('/', response_model=schemas.user.ShowUser,)
+@ router.put('/', response_model=schemas.user.ShowUser,)
 def update_user(request: schemas.user.EditUser, req: Request, db: Session = Depends(get_db),
                 current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
     if not (user_repo.update_user(get_user_id_from_request_jwt(req), request, db)):
@@ -123,7 +186,7 @@ def update_user(request: schemas.user.EditUser, req: Request, db: Session = Depe
     return user_repo.get_user_by_id(get_user_id_from_request_jwt(req), db)
 
 
-@router.put('/{id}', response_model=schemas.user.ShowUser,)
+@ router.put('/{id}', response_model=schemas.user.ShowUser,)
 def update_any_user(id: int, request: schemas.user.EditUser, db: Session = Depends(get_db),
                     current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     if not (user_repo.update_user(id, request, db)):
@@ -131,13 +194,13 @@ def update_any_user(id: int, request: schemas.user.EditUser, db: Session = Depen
     return user_repo.get_user_by_id(id, db)
 
 
-@router.put('/{id}/role/{role}')
+@ router.put('/{id}/role/{role}')
 def update_user_role(id: int, role: str, db: Session = Depends(get_db),
                      current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     return user_repo.update_user_role(id, role, db)
 
 
-@router.delete('/{id}')
+@ router.delete('/{id}')
 def delete_user(id: int, db: Session = Depends(get_db),
                 current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     if (user_repo.delete_user(id, db)):
@@ -145,7 +208,7 @@ def delete_user(id: int, db: Session = Depends(get_db),
     return Response(status_code=status.HTTP_404_NOT_FOUND)
 
 
-@router.delete('/hard_delete/{id}')
+@ router.delete('/hard_delete/{id}')
 def hard_delete_user(id: int, db: Session = Depends(get_db),
                      current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
     if (user_repo.hard_delete_user(id, db)):

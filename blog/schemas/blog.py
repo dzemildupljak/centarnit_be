@@ -16,7 +16,6 @@ class UpdateBlog(BaseModel):
 class CreateBlog(BaseModel):
     title: str
     body: str
-    author: int
 
     class Config:
         orm_mode = True

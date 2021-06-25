@@ -9,6 +9,7 @@ class User(BaseModel):
     password: str
     role: str
     is_active: bool
+    phone_number: str
 
 
 class CreateUser(BaseModel):
@@ -20,11 +21,13 @@ class CreateUser(BaseModel):
     @validator('password')
     def password_must_contain_nums_letters(cls, password: str):
         if len(password) < 5:
-            raise ValueError('must contain more than 5 characters')
+            raise ValueError('password must contain more than 5 characters')
+        if len(password) > 30:
+            raise ValueError('password must contain less than 30 characters')
         if not any(chr.isalnum for chr in password):
-            raise ValueError('must contain only leter and digit')
+            raise ValueError('password must contain only leter and digit')
         if not any(chr.isdigit for chr in password):
-            raise ValueError(f'must contain a digit')
+            raise ValueError(f'password must contain a digit')
         return password
 
     # class Config:
@@ -52,6 +55,7 @@ class EditUser(BaseModel):
     name: str
     email: str
     username: str
+    phone_number: str
 
     class Config:
         orm_mode = True
