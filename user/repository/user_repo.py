@@ -34,7 +34,7 @@ def get_user_by_email(email: str, db: Session) -> user.User:
     usr = db.query(user.User).where(user.User.email == email).first()
     if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'User with id {id} was not found')
+                            detail=f'User was not found')
 
     return usr
 
@@ -43,7 +43,7 @@ def get_user_by_username(username: str, db: Session) -> user.User:
     usr = db.query(user.User).where(user.User.username == username).first()
     if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f'User with id {id} was not found')
+                            detail=f'User was not found')
 
     return usr
 

@@ -72,36 +72,6 @@ async def create_user(request: schemas.user.CreateUser, background_tasks: Backgr
                             detail='Invalid login validation')
     new_user = user_repo.create_user(request, db)
     if new_user:
-        # message = MessageSchema(
-        #     subject="Fastapi mail module",
-        #     recipients=[new_user.email],
-        #     body=f"""
-        #         <p>Thanks for using our aplication</p>
-        #         <p>Confirm your account <a href="{HOST_DOMAIN}auth/confirm/{new_user.user_identifier}" target="_blank">here</a></p>
-        #         """,
-        #     subtype="html"
-        # )
-
-        # fm = FastMail(conf)
-
-        # background_tasks.add_task(fm.send_message, message)
-        # load_items = []
-        # try:
-        #     with open('stream.msgpack', 'rb') as f:
-        #         load_items = [item for item in msgpack.Unpacker(f)]
-        # except:
-        #     pass
-
-        # load_items.append(
-        #     {
-        #         'code': generate_ot_confirmation_code(new_user.created_at),
-        #         'email': new_user.email,
-        #         'time': str(new_user.created_at)
-        #     }
-        # )
-        # with open('stream.msgpack', 'wb') as f:
-        #     for i in load_items:
-        #         f.write(msgpack.packb(i))
         return new_user
 
 
@@ -127,9 +97,14 @@ def req_confirmation_by_email(email: str, background_tasks: BackgroundTasks, db:
 
 
 @router.get('/confirm-user/code/')
-def req_confirmation_by_code(background_tasks: BackgroundTasks, email: Optional[str] = None, usernane: Optional[str] = None, db: Session = Depends(get_db)):
+def req_confirmation_by_code(background_tasks: BackgroundTasks, email: Optional[str] = None, username: Optional[str] = None, db: Session = Depends(get_db)):
     load_items = []
-    new_user = user_repo.get_user_by_email(email, db)
+    if email:
+        new_user = user_repo.get_user_by_email(email, db)
+    elif username:
+        new_user = user_repo.get_user_by_username(username, db)
+    else:
+        return Response(status_code=status.HTTP_404_NOT_FOUND)
     try:
         with open('stream.msgpack', 'rb') as f:
             load_items = [item for item in msgpack.Unpacker(f)]
