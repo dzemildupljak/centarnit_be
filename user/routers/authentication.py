@@ -1,6 +1,6 @@
 import datetime
 from typing import Optional
-from user.helpers.helpers import get_time_between
+from user.helpers.helpers import generate_ot_confirmation_code, get_time_between
 from user.repository import user_repo
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
@@ -63,15 +63,17 @@ def login(request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(
     return {"access_token": access_token}
 
 
-@router.get('/confirm/{identifier}')
-def confirm_user(identifier: str, db: Session = Depends(get_db)):
+@router.get('/mail/{email}/confirm/{identifier}')
+def confirm_user(email: str, identifier: str, db: Session = Depends(get_db)):
     user = db.query(User).filter(
-        User.user_identifier == identifier)
+        User.email == email)
 
-    if not user.first() or user.first().user_identifier != identifier:
+    if not user.first():
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'User with id {identifier} was not confirmed')
-
+    if generate_ot_confirmation_code(user.first().created_at) != identifier:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f'User with id {identifier} was not confirmed')
     user.update({User.is_confirmed: True, User.role: 'user'})
     db.commit()
     raise HTTPException(status_code=status.HTTP_200_OK,
@@ -85,8 +87,9 @@ def confirm_user_by_code(confirmation_code: str, username: Optional[str] = None,
     else:
         usr = user_repo.get_user_by_username(email, db)
     try:
-        with open('stream.msgpack', 'rb') as f:
+        with open('stream.msgpack', 'rb+') as f:
             load_items = [item for item in msgpack.Unpacker(f)]
+            f.truncate(0)
     except:
         pass
 
@@ -96,16 +99,9 @@ def confirm_user_by_code(confirmation_code: str, username: Optional[str] = None,
                 and i['code'] == confirmation_code):
             del i
             user_repo.update_user_role(usr.id, 'user', db)
+    with open('stream.msgpack', 'wb') as f:
+        for i in load_items:
+            f.write(msgpack.packb(i))
 
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                         detail=f'User was not updated')
-
-
-# @router.get('/confirm/mail/{user_mail}/code/{confirmation_code}')
-# def confirm_user_code(user_mail: str, confirmation_code: str, db: Session = Depends(get_db)):
-#     user = db.query(User).filter(
-#         User.email == user_mail)
-
-#     if not user.first():
-#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-#                             detail=f'User was not confirmed')

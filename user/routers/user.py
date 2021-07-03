@@ -1,5 +1,4 @@
 import os
-import msgpack
 from user.helpers.helpers import generate_ot_confirmation_code
 from fastapi.exceptions import HTTPException
 from pydantic.error_wrappers import ValidationError
@@ -16,7 +15,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 from database import get_db
 from user import schemas
-from user.repository import user_repo
+from user.repository import confirmation_repo, user_repo
 from user.helpers.oaut2 import get_current_user
 from user.helpers.helper_conf import conf
 
@@ -57,7 +56,7 @@ def get_current_logged_user(req: Request, db: Session = Depends(get_db),
 
 
 @router.post('/', response_model=schemas.user.ShowUser)
-async def create_user(request: schemas.user.CreateUser, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def create_user(request: schemas.user.CreateUser, db: Session = Depends(get_db)):
     try:
         schemas.user.CreateUser(
             name=request.name,
@@ -79,13 +78,13 @@ def req_confirmation_by_email(email: str, background_tasks: BackgroundTasks, db:
     usr = user_repo.get_user_by_email(email, db)
     if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail='Invalid login validation')
+                            detail='Invalid validation')
     message = MessageSchema(
         subject="Fastapi mail module",
         recipients=[usr.email],
         body=f"""
                 <p>Thanks for using our aplication</p>
-                <p>Confirm your account <a href="{HOST_DOMAIN}auth/confirm/{usr.user_identifier}" target="_blank">here</a></p>
+                <p>Confirm your account <a href="{HOST_DOMAIN}auth/mail/{usr.email}/confirm/{generate_ot_confirmation_code(usr.user_identifier)}" target="_blank">here</a></p>
                 """,
         subtype="html"
     )
@@ -96,31 +95,8 @@ def req_confirmation_by_email(email: str, background_tasks: BackgroundTasks, db:
 
 
 @router.get('/confirm-user/code/')
-def req_confirmation_by_code(background_tasks: BackgroundTasks, email: Optional[str] = None, username: Optional[str] = None, db: Session = Depends(get_db)):
-    load_items = []
-    if email:
-        new_user = user_repo.get_user_by_email(email, db)
-    elif username:
-        new_user = user_repo.get_user_by_username(username, db)
-    else:
-        return Response(status_code=status.HTTP_404_NOT_FOUND)
-    try:
-        with open('stream.msgpack', 'rb') as f:
-            load_items = [item for item in msgpack.Unpacker(f)]
-    except:
-        pass
-
-    load_items.append(
-        {
-            'code': generate_ot_confirmation_code(new_user.created_at),
-            'email': new_user.email,
-            'time': str(new_user.created_at)
-        }
-    )
-    with open('stream.msgpack', 'wb') as f:
-        for i in load_items:
-            f.write(msgpack.packb(i))
-    return new_user
+def req_confirmation_by_code(email: Optional[str] = None, username: Optional[str] = None, db: Session = Depends(get_db)):
+    return confirmation_repo.req_confirmation_generator(email if email else username, db)
 
 
 @router.get('/reset-password/{id}/{email}')
