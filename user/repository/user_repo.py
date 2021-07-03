@@ -68,9 +68,17 @@ def get_user_by_identifier(identifier: int, db: Session):
 
 
 def create_user(user_req: user.User, db: Session):
+    ################### remove in production with alembic migrations ##########
+    if not get_user_by_username('sysadmin', db):
+        new_sysadmin = user.User(name='sysadmin', email='sysadmin@mail.com',
+                                 username='sysadmin', password=bycrpt_hash(
+                                     'sysadmin'), role='', user_identifier=str(uuid.uuid1()))
+        db.add(new_sysadmin)
+    ################### remove in production with alembic migrations ##########
+
     try:
         new_user = user.User(name=user_req.name, email=user_req.email,
-                             username=user_req.username, password=bycrpt_hash(
+                             username=user_req.username, is_active=True, password=bycrpt_hash(
                                  user_req.password), role='', user_identifier=str(uuid.uuid1()))
         db.add(new_user)
         db.commit()
@@ -90,6 +98,7 @@ def update_user_role(id: int, rle: str, db: Session):
                             detail='Cannot assign this role')
     usr = db.query(user.User).filter(
         user.User.id == id, user.User.role != rle).update({user.User.role: rle})
+    print(30*'=', usr)
     if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'User with id {id} was not updated')

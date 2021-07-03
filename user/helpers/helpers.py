@@ -1,7 +1,7 @@
 import datetime
 
 
-def generate_ot_confirmation_code(date_time):
+def generate_ot_confirmation_code(date_time) -> str:
     var = str(date_time).split(':')
     var[-1] = var[-1].replace('.', '')
     return var[-1]
