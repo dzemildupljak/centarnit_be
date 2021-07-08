@@ -99,35 +99,6 @@ def req_confirmation_by_code(email: Optional[str] = None, username: Optional[str
     return confirmation_repo.req_confirmation_generator(email if email else username, db)
 
 
-@router.get('/reset-password/{id}/{email}')
-def reset_password(id: int, email: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    usr = user_repo.get_user_by_id(id, db)
-    if usr and usr.email == email:
-        message = MessageSchema(
-            subject="Fastapi mail module",
-            recipients=[email],
-            body=f"""
-                <p>Thanks for using Fastapi-mail</p>
-                <p><a href="{HOST_DOMAIN}reset-password/confirm/{usr.user_identifier}" target="_blank">Confirm here</a></p>
-                """,
-            subtype="html"
-        )
-
-        fm = FastMail(conf)
-        background_tasks.add_task(fm.send_message, message)
-        return usr
-    return Response(status_code=status.HTTP_404_NOT_FOUND)
-
-
-@ router.post('/reset-password/confirm/{identifier}')
-def reset_password_confirm(identifier: str,  password: str, password_confirm: str, db: Session = Depends(get_db)):
-    if password == password_confirm:
-        usr = user_repo.get_user_by_identifier(identifier, db)
-        if user_repo.reset_password(usr.id, password, db):
-            return Response(status_code=status.HTTP_204_NO_CONTENT)
-    return Response(status_code=status.HTTP_404_NOT_FOUND)
-
-
 @ router.put('/', response_model=schemas.user.ShowUser,)
 def update_user(request: schemas.user.EditUser, req: Request, db: Session = Depends(get_db),
                 current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):

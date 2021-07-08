@@ -1,5 +1,8 @@
 import datetime
 from typing import Optional
+from user.helpers.oaut2 import get_current_user
+
+from fastapi.param_functions import Security
 from user.helpers.helpers import generate_ot_confirmation_code, get_time_between
 from user.repository import user_repo
 from fastapi import APIRouter, Depends, status, HTTPException
@@ -81,7 +84,9 @@ def confirm_user(email: str, identifier: str, db: Session = Depends(get_db)):
 
 
 @router.get('/confirm/code/{confirmation_code}')
-def confirm_user_by_code(confirmation_code: str, username: Optional[str] = None, email: Optional[str] = None,  db: Session = Depends(get_db)):
+def confirm_user_by_code(confirmation_code: str, username: Optional[str] = None,
+                         email: Optional[str] = None,  db: Session = Depends(get_db),
+                         current_user: schemas.user.User = Security(get_current_user, scopes=['undefined'])):
     if username:
         usr = user_repo.get_user_by_username(username, db)
     else:

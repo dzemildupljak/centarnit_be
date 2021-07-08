@@ -6,6 +6,7 @@ class Blog(BaseModel):
     id: int
     title: str
     body: str
+    cover_image: str = ''
 
 
 class UpdateBlog(BaseModel):

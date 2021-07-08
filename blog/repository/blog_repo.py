@@ -1,4 +1,6 @@
-from fastapi import HTTPException, status
+import os
+from fastapi import HTTPException, status, UploadFile, File
+import shutil
 from sqlalchemy.orm import Session
 from blog import models, schemas
 
@@ -34,12 +36,24 @@ def get_my_blog_by_id(id: int, author_id: int, db: Session):
 
 
 def create_blog(author_id: int, blog: schemas.blog.CreateBlog, db: Session):
-    new_blog = models.blog.Blog(title=blog.title,
-                                body=blog.body, user_id=author_id)
+    new_blog = models.blog.Blog(
+        title=blog.title, body=blog.body, user_id=author_id)
     db.add(new_blog)
     db.commit()
     db.refresh(new_blog)
     return new_blog
+
+
+def upload_cover_image(author_id: int, blog_id: int, cover_img: UploadFile, db: Session):
+    blog = get_blog_by_id(blog_id, db)
+    if cover_img != None:
+        file_path = os.path.join(
+            f'{os.path.abspath(os.getcwd())}\\assets\\blog_image', cover_img.filename)
+        print(file_path)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(cover_img.file, buffer)
+        blog.cover_image = file_path
+        update_blog(author_id, blog.id, blog, db)
 
 
 def update_blog(author_id: int, blog_id: int, blog_req: schemas.blog.Blog, db: Session):
@@ -48,7 +62,7 @@ def update_blog(author_id: int, blog_id: int, blog_req: schemas.blog.Blog, db: S
     if not blog.first():
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                              detail=f"Blog with id {id} not found")
-    blog.update(dict(blog_req))
+    blog.update({"cover_image": blog.first().cover_image})
     db.commit()
     return 'updated'
 
