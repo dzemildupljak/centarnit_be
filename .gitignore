@@ -8,3 +8,4 @@ database_test.py
 /data
 .env
 stream.msgpack
+/assets

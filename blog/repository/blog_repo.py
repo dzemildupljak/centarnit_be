@@ -47,9 +47,12 @@ def create_blog(author_id: int, blog: schemas.blog.CreateBlog, db: Session):
 def upload_cover_image(author_id: int, blog_id: int, cover_img: UploadFile, db: Session):
     blog = get_blog_by_id(blog_id, db)
     if cover_img != None:
+        if not os.path.exists(f'{os.path.abspath(os.getcwd())}\\assets\\blog_image'):
+            os.makedirs(f'{os.path.abspath(os.getcwd())}\\assets\\blog_image')
+
         file_path = os.path.join(
             f'{os.path.abspath(os.getcwd())}\\assets\\blog_image', cover_img.filename)
-        print(file_path)
+
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(cover_img.file, buffer)
         blog.cover_image = file_path
