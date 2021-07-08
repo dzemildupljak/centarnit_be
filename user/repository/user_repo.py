@@ -79,7 +79,7 @@ def create_user(user_req: user.User, db: Session):
     try:
         new_user = user.User(name=user_req.name, email=user_req.email,
                              username=user_req.username, is_active=True, password=bycrpt_hash(
-                                 user_req.password), role='', user_identifier=str(uuid.uuid1()))
+                                 user_req.password), role='undefined', user_identifier=str(uuid.uuid1()))
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
@@ -98,7 +98,6 @@ def update_user_role(id: int, rle: str, db: Session):
                             detail='Cannot assign this role')
     usr = db.query(user.User).filter(
         user.User.id == id, user.User.role != rle).update({user.User.role: rle})
-    print(30*'=', usr)
     if not usr:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f'User with id {id} was not updated')
