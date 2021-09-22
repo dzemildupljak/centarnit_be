@@ -13,8 +13,11 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 SQLALCHEMY_DATABASE_URL = os.getenv('SQLALCHEMY_DATABASE_URL')
+LOCAL_DATABASE_URL = os.getenv('LOCAL_DATABASE_URL')
 config.set_main_option(
-    "sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
+    "sqlalchemy.url", LOCAL_DATABASE_URL)
+# config.set_main_option(
+#     "sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
 
 # config.set_main_option(
 #     "sqlalchemy.url", "postgresql://postgres:root@db:5432/centarnit_db")

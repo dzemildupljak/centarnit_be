@@ -11,4 +11,3 @@ class Blog(Base):
     body = Column(String)
     user_id = Column(Integer, ForeignKey('users.id'))
     created_at = Column(DateTime, default=datetime.now(), nullable=True)
-    cover_image = Column(String)

@@ -1,10 +1,10 @@
 import os
 import shutil
+from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, status, UploadFile, File, Form
 from user.helpers.JWToken import get_user_id_from_request_jwt
-from typing import List, Optional
+from typing import List
 from fastapi.param_functions import Security
-from sqlalchemy.orm import Session
 from starlette.requests import Request
 from database import get_db
 from blog.schemas import blog
@@ -36,10 +36,10 @@ def get_all_my_blogs(req: Request, db: Session = Depends(get_db),
 
 
 @router.get('/id/{id}', status_code=status.HTTP_200_OK, response_model=blog.ShowBlog)
-def get_blog_by_id(id: int, req: Request, db: Session = Depends(get_db),
+def get_blog_by_id(id: int, db: Session = Depends(get_db),
                    current_user: user.User =
                    Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
-    return blog_repo.get_blog_by_id(id, get_user_id_from_request_jwt(req), db)
+    return blog_repo.get_blog_by_id(id, db)
 
 
 @router.get('my/id/{id}', status_code=status.HTTP_200_OK, response_model=blog.ShowBlog)
@@ -77,23 +77,22 @@ def delete_blog(blog_id: int, req: Request, db: Session = Depends(get_db),
     return blog_repo.delete_blog(get_user_id_from_request_jwt(req), blog_id, db)
 
 
-@router.post("/uploadfile/")
-async def create_upload_file(file: UploadFile = File(...)):
-    # file_path = os.path.abspath(os.getcwd())
-    file_path = os.path.join(
-        f'{os.path.abspath(os.getcwd())}\\assets\\blog_image', file.filename)
-    print(file_path)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    return {"filename": file, "filepath": file_path}
+# @router.post("/uploadfile/")
+# async def create_upload_file(file: UploadFile = File(...)):
+#     # file_path = os.path.abspath(os.getcwd())
+#     file_path = os.path.join(
+#         f'{os.path.abspath(os.getcwd())}\\assets\\blog_image', file.filename)
+#     with open(file_path, "wb") as buffer:
+#         shutil.copyfileobj(file.file, buffer)
+#     return {"filename": file, "filepath": file_path}
 
 
-@router.post("/files/")
-async def create_file(
-    file: bytes = File(...), fileb: UploadFile = File(...), token: str = Form(...)
-):
-    return {
-        "file_size": len(file),
-        "token": token,
-        "fileb_content_type": fileb.content_type,
-    }
+# @router.post("/files/")
+# async def create_file(
+#     file: bytes = File(...), fileb: UploadFile = File(...), token: str = Form(...)
+# ):
+#     return {
+#         "file_size": len(file),
+#         "token": token,
+#         "fileb_content_type": fileb.content_type,
+#     }

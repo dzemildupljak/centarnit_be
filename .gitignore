@@ -7,5 +7,6 @@ database_test.py
 
 /data
 .env
+.env.docker
 stream.msgpack
 /assets
