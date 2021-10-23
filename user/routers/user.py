@@ -28,30 +28,22 @@ router = APIRouter(
 
 
 @router.get('/all', response_model=List[schemas.user.ShowActiveUser])
-def get_all_users(db: Session = Depends(get_db),
-                  current_user: schemas.user.User =
-                  Security(get_current_user, scopes=['sysadmin', 'admin'])):
+def get_all_users(db: Session = Depends(get_db)):
     return user_repo.get_all_users(db)
 
 
 @router.get('/all/active', response_model=List[schemas.user.ShowActiveUser])
-def get_all_active_users(db: Session = Depends(get_db),
-                         current_user: schemas.user.User =
-                         Security(get_current_user, scopes=['sysadmin', 'admin'])):
+def get_all_active_users(db: Session = Depends(get_db)):
     return user_repo.get_all_active_users(db)
 
 
 @router.get('/{id}', response_model=schemas.user.ShowUser)
-def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db),
-                   current_user: schemas.user.User =
-                   Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+def get_user_by_id(id: int, req: Request, db: Session = Depends(get_db)):
     return user_repo.get_user_by_id(id, db)
 
 
 @router.get('/current/', response_model=schemas.user.ShowUser)
-def get_current_logged_user(req: Request, db: Session = Depends(get_db),
-                            current_user: schemas.user.User =
-                            Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+def get_current_logged_user(req: Request, db: Session = Depends(get_db)):
     return user_repo.get_current_user_by_id(get_user_id_from_request_jwt(req), db)
 
 
@@ -100,8 +92,7 @@ def req_confirmation_by_code(email: Optional[str] = None, username: Optional[str
 
 
 @ router.put('/', response_model=schemas.user.ShowUser,)
-def update_user(request: schemas.user.EditUser, req: Request, db: Session = Depends(get_db),
-                current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin', 'user'])):
+def update_user(request: schemas.user.EditUser, req: Request, db: Session = Depends(get_db)):
     if not (user_repo.update_user(get_user_id_from_request_jwt(req), request, db)):
         return Response(status_code=status.HTTP_404_NOT_FOUND)
     return user_repo.get_user_by_id(get_user_id_from_request_jwt(req), db)
