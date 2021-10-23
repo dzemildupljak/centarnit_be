@@ -109,7 +109,7 @@ def update_user(request: schemas.user.EditUser, req: Request, db: Session = Depe
 
 @ router.put('/{id}', response_model=schemas.user.ShowUser,)
 def update_any_user(id: int, request: schemas.user.EditUser, db: Session = Depends(get_db),
-                    current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
+                    ):
     if not (user_repo.update_user(id, request, db)):
         return Response(status_code=status.HTTP_404_NOT_FOUND)
     return user_repo.get_user_by_id(id, db)
@@ -117,13 +117,13 @@ def update_any_user(id: int, request: schemas.user.EditUser, db: Session = Depen
 
 @ router.put('/{id}/role/{role}')
 def update_user_role(id: int, role: str, db: Session = Depends(get_db),
-                     current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
+                     ):
     return user_repo.update_user_role(id, role, db)
 
 
 @ router.delete('/{id}')
 def delete_user(id: int, db: Session = Depends(get_db),
-                current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
+                ):
     if (user_repo.delete_user(id, db)):
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     return Response(status_code=status.HTTP_404_NOT_FOUND)
@@ -131,7 +131,7 @@ def delete_user(id: int, db: Session = Depends(get_db),
 
 @ router.delete('/hard_delete/{id}')
 def hard_delete_user(id: int, db: Session = Depends(get_db),
-                     current_user: schemas.user.User = Security(get_current_user, scopes=['sysadmin', 'admin'])):
+                     ):
     if (user_repo.hard_delete_user(id, db)):
         return Response(status_code=status.HTTP_204_NO_CONTENT)
     return Response(status_code=status.HTTP_404_NOT_FOUND)
